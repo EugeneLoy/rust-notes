@@ -1,5 +1,9 @@
-use axum::Router;
-use axum::routing::get;
+use crate::routes::build_router;
+
+mod schema;
+mod routes;
+mod rest;
+
 
 // TODO remove hardcode
 struct Config {
@@ -20,7 +24,7 @@ impl Config {
 async fn main() {
     let config = Config::build();
 
-    let app = Router::new().route("/", get(|| async { "Hello, Rust!" }));
+    let app = build_router();
 
     println!("Running on http://localhost:{}", config.port);
     axum::Server::bind(&format!("0.0.0.0:{}", config.port).parse().unwrap())
