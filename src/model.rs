@@ -1,10 +1,10 @@
-use diesel::{AsChangeset, Insertable, Queryable, Selectable};
+use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-use crate::schema::notebooks;
+use crate::schema::{notebooks, notes};
 
-#[derive(Debug, Queryable, Selectable, Serialize, JsonSchema)]
+#[derive(Debug, PartialEq, Identifiable, Queryable, Selectable, Serialize, JsonSchema)]
 #[diesel(table_name = notebooks)]
 pub struct Notebook {
     pub id: i32,
@@ -15,4 +15,20 @@ pub struct Notebook {
 #[diesel(table_name = notebooks)]
 pub struct CreateUpdateNotebook {
     pub name: String
+}
+
+#[derive(Debug, PartialEq, Identifiable, Associations, Queryable, Selectable, Serialize, JsonSchema)]
+#[diesel(table_name = notes)]
+#[diesel(belongs_to(Notebook))]
+pub struct Note {
+    pub id: i32,
+    pub notebook_id: i32,
+    pub content: String
+}
+
+#[derive(Debug, Serialize, JsonSchema)]
+pub struct NotebookWithNotes {
+    #[serde(flatten)]
+    pub notebook: Notebook,
+    pub notes: Vec<Note>
 }

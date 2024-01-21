@@ -4,7 +4,7 @@ use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
-use diesel::{QueryDsl, SelectableHelper};
+use diesel::{BelongingToDsl, QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
 
 use crate::model::*;
@@ -30,15 +30,19 @@ pub async fn create_notebook(Extension(pool): Extension<Pool>, Json(create_noteb
         .coerce_err()
 }
 
-pub async fn get_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>) -> Result<Json<Notebook>, Response> {
-    notebooks::table
+pub async fn get_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>) -> Result<Json<NotebookWithNotes>, Response> {
+    let notebook: Notebook = notebooks::table
         .find(id)
         .get_result(&mut pool.get().await.coerce_err()?).await
-        .map(Json)
         .map_err(|e| match e {
             diesel::NotFound => { StatusCode::NOT_FOUND.into_response() }
             e => { (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response() }
-        })
+        })?;
+
+    Note::belonging_to(&notebook)
+        .get_results(&mut pool.get().await.coerce_err()?).await
+        .map(|notes| Json(NotebookWithNotes { notebook, notes }))
+        .coerce_err()
 }
 
 pub async fn update_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>, Json(update_notebook): Json<CreateUpdateNotebook>) -> Result<StatusCode, Response> {
