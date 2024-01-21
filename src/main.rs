@@ -1,6 +1,8 @@
 use std::error::Error;
 
 use axum::extract::Extension;
+use tower_http::trace::{self, TraceLayer};
+use tracing::Level;
 
 use crate::config::Config;
 use crate::repository::build_pool;
@@ -17,10 +19,20 @@ mod config;
 async fn main() -> Result<(), Box<dyn Error>>{
     let config = Config::build();
 
+    tracing_subscriber::fmt()
+        .with_target(false)
+        .compact()
+        .init();
+    let trace_layer = TraceLayer::new_for_http()
+        .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+        .on_response(trace::DefaultOnResponse::new().level(Level::INFO));
+
     let pool = build_pool(&config);
 
     let app = build_router()
-        .layer(Extension(pool));
+        .layer(Extension(pool))
+        .layer(trace_layer)
+    ;
 
     let listener = tokio::net::TcpListener::bind(&format!("0.0.0.0:{}", config.port)).await?;
     println!("Running on http://localhost:{}", config.port);
