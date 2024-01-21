@@ -1,6 +1,5 @@
 use std::error::Error;
 
-use axum::extract::Extension;
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 
@@ -30,8 +29,8 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let pool = build_pool(&config);
 
     let app = build_router()
-        .layer(Extension(pool))
         .layer(trace_layer)
+        .with_state(pool)
     ;
 
     let listener = tokio::net::TcpListener::bind(&format!("0.0.0.0:{}", config.port)).await?;

@@ -10,10 +10,10 @@ use axum::{Extension, Json, Router};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
+use crate::repository::Pool;
 use crate::rest::{notebooks, notes};
 
-
-pub fn build_router() -> Router {
+pub fn build_router() -> Router<Pool> {
     let mut open_api = OpenApi {
         info: Info {
             description: Some(String::from("Rust Notes API")),

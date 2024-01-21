@@ -1,5 +1,5 @@
-use axum::{Extension, Json};
-use axum::extract::Path;
+use axum::Json;
+use axum::extract::{State, Path};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
@@ -13,7 +13,7 @@ use crate::repository::Pool;
 use crate::schema::{notebooks, notes};
 
 
-pub async fn create_notebook(Extension(pool): Extension<Pool>, Json(create_notebook): Json<CreateUpdateNotebook>) -> Result<Json<i32>, Response> {
+pub async fn create_notebook(State(pool): State<Pool>, Json(create_notebook): Json<CreateUpdateNotebook>) -> Result<Json<i32>, Response> {
     diesel::insert_into(notebooks::table)
         .values(&create_notebook)
         .returning(Notebook::as_select())
@@ -22,7 +22,7 @@ pub async fn create_notebook(Extension(pool): Extension<Pool>, Json(create_noteb
         .coerce_err()
 }
 
-pub async fn get_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>) -> Result<Json<NotebookWithNotes>, Response> {
+pub async fn get_notebook(State(pool): State<Pool>, Path(id): Path<i32>) -> Result<Json<NotebookWithNotes>, Response> {
     let notebook: Notebook = notebooks::table
         .find(id)
         .get_result(&mut pool.get().await.coerce_err()?).await
@@ -38,9 +38,9 @@ pub async fn get_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>)
         .coerce_err()
 }
 
-pub async fn update_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>, Json(update_notebook): Json<CreateUpdateNotebook>) -> Result<StatusCode, Response> {
+pub async fn update_notebook(State(pool): State<Pool>, Path(id): Path<i32>, Json(update_notebook): Json<CreateUpdateNotebook>) -> Result<StatusCode, Response> {
     diesel::update(notebooks::table.find(id))
-        .set(update_notebook)
+        .set(&update_notebook)
         .execute(&mut pool.get().await.coerce_err()?).await
         .map(|updated| match updated {
             1 => StatusCode::OK,
@@ -49,7 +49,7 @@ pub async fn update_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i3
         .coerce_err()
 }
 
-pub async fn delete_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>) -> Result<StatusCode, Response> {
+pub async fn delete_notebook(State(pool): State<Pool>, Path(id): Path<i32>) -> Result<StatusCode, Response> {
     (pool.get().await.coerce_err()?).transaction::<StatusCode, diesel::result::Error, _>(|connection| async move {
         diesel::delete(notes::table)
             .filter(notes::notebook_id.eq(id))
@@ -64,7 +64,7 @@ pub async fn delete_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i3
     }.scope_boxed()).await.coerce_err()
 }
 
-pub async fn list_notebooks(Extension(pool): Extension<Pool>) -> Result<Json<Vec<Notebook>>, Response> {
+pub async fn list_notebooks(State(pool): State<Pool>) -> Result<Json<Vec<Notebook>>, Response> {
     notebooks::table
         .select(Notebook::as_select())
         .get_results(&mut pool.get().await.coerce_err()?).await

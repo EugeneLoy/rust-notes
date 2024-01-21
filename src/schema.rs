@@ -10,8 +10,8 @@ diesel::table! {
 diesel::table! {
     notes (id) {
         id -> Int4,
-        notebook_id -> Int4,
         content -> Text,
+        notebook_id -> Int4,
     }
 }
 

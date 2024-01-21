@@ -22,15 +22,15 @@ pub struct CreateUpdateNotebook {
 #[diesel(belongs_to(Notebook))]
 pub struct Note {
     pub id: i32,
-    pub notebook_id: i32,
-    pub content: String
+    pub content: String,
+    pub notebook_id: i32
 }
 
 #[derive(Debug, Deserialize, Insertable, AsChangeset, JsonSchema)]
 #[diesel(table_name = notes)]
 pub struct CreateUpdateNote {
-    pub notebook_id: i32,
-    pub content: String
+    pub content: String,
+    pub notebook_id: i32
 }
 
 #[derive(Debug, Serialize, JsonSchema)]

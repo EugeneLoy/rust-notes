@@ -6,6 +6,6 @@ CREATE TABLE notebooks (
 
 CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
-    notebook_id INTEGER REFERENCES notebooks(id) NOT NULL,
-    content TEXT NOT NULL
+    content TEXT NOT NULL,
+    notebook_id INTEGER REFERENCES notebooks(id) NOT NULL
 );
