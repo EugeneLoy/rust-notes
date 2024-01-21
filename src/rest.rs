@@ -4,12 +4,13 @@ use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
-use diesel::{BelongingToDsl, QueryDsl, SelectableHelper};
-use diesel_async::RunQueryDsl;
+use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl, SelectableHelper};
+use diesel_async::{AsyncConnection, RunQueryDsl};
+use diesel_async::scoped_futures::ScopedFutureExt;
 
 use crate::model::*;
 use crate::repository::Pool;
-use crate::schema::notebooks;
+use crate::schema::{notebooks, notes};
 
 trait CoerceErrExt<T, U : Error> {
     fn coerce_err(self) -> Result<T, Response>;
@@ -17,7 +18,9 @@ trait CoerceErrExt<T, U : Error> {
 
 impl<T, U: Error> CoerceErrExt<T, U> for Result<T, U> {
     fn coerce_err(self) -> Result<T, Response> {
-        self.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response())
+        self.map_err(|e|
+            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+        )
     }
 }
 
@@ -39,6 +42,7 @@ pub async fn get_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>)
             e => { (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response() }
         })?;
 
+    // TODO this can be done without round trip to db (using join on query above):
     Note::belonging_to(&notebook)
         .get_results(&mut pool.get().await.coerce_err()?).await
         .map(|notes| Json(NotebookWithNotes { notebook, notes }))
@@ -57,13 +61,18 @@ pub async fn update_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i3
 }
 
 pub async fn delete_notebook(Extension(pool): Extension<Pool>, Path(id): Path<i32>) -> Result<StatusCode, Response> {
-    diesel::delete(notebooks::table.find(id))
-        .execute(&mut pool.get().await.coerce_err()?).await
-        .map(|updated| match updated {
-            1 => StatusCode::OK,
-            _ => StatusCode::BAD_REQUEST
-        })
-        .coerce_err()
+    (pool.get().await.coerce_err()?).transaction::<StatusCode, diesel::result::Error, _>(|connection| async move {
+        diesel::delete(notes::table)
+            .filter(notes::notebook_id.eq(id))
+            .execute(connection).await?;
+
+        diesel::delete(notebooks::table.find(id))
+            .execute(connection).await
+            .map(|deleted| match deleted {
+                1 => StatusCode::OK,
+                _ => StatusCode::BAD_REQUEST
+            })
+    }.scope_boxed()).await.coerce_err()
 }
 
 pub async fn list_notebooks(Extension(pool): Extension<Pool>) -> Result<Json<Vec<Notebook>>, Response> {
