@@ -13,7 +13,6 @@ mod repository;
 mod model;
 mod config;
 
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{
     let config = Config::build();
@@ -23,11 +22,9 @@ async fn main() -> Result<(), Box<dyn Error>>{
     let app = build_router()
         .layer(Extension(pool));
 
+    let listener = tokio::net::TcpListener::bind(&format!("0.0.0.0:{}", config.port)).await?;
     println!("Running on http://localhost:{}", config.port);
-    axum::Server::bind(&format!("0.0.0.0:{}", config.port).parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    axum::serve(listener, app).await?;
 
     Ok(())
 }
