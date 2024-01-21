@@ -1,5 +1,5 @@
+use std::env;
 
-// TODO remove hardcode
 pub struct Config {
     pub port: i32,
     pub database_uri: String
@@ -7,10 +7,10 @@ pub struct Config {
 
 impl Config {
     pub fn build() -> Config {
-        // TODO remove hardcode
+        // TODO remove hardcode, handle errors
         Config {
             port: 3000,
-            database_uri: String::from("postgres://postgres:qwe@127.0.0.1/rust_notes")
+            database_uri: env::var("DATABASE_URL").expect("DATABASE_URL is not set")
         }
     }
 }
