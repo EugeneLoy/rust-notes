@@ -10,7 +10,8 @@ use axum::{Extension, Json, Router};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
-use crate::rest::*;
+use crate::rest::{notebooks, notes};
+
 
 pub fn build_router() -> Router {
     let mut open_api = OpenApi {
@@ -22,11 +23,15 @@ pub fn build_router() -> Router {
     };
 
     ApiRouter::new()
-        .api_route("/api/notebooks", post(create_notebook))
-        .api_route("/api/notebooks/:id", get(get_notebook))
-        .api_route("/api/notebooks/:id", post(update_notebook))
-        .api_route("/api/notebooks/:id", delete(delete_notebook))
-        .api_route("/api/notebooks", get(list_notebooks))
+        .api_route("/api/notebooks", post(notebooks::create_notebook))
+        .api_route("/api/notebooks/:id", get(notebooks::get_notebook))
+        .api_route("/api/notebooks/:id", post(notebooks::update_notebook))
+        .api_route("/api/notebooks/:id", delete(notebooks::delete_notebook))
+        .api_route("/api/notebooks", get(notebooks::list_notebooks))
+        .api_route("/api/notes", post(notes::create_note))
+        .api_route("/api/notes/:id", get(notes::get_note))
+        .api_route("/api/notes/:id", post(notes::update_note))
+        .api_route("/api/notes/:id", delete(notes::delete_note))
         .fallback(fallback_handler)
         .route("/api.json", get(serve_open_api))
         .route("/redoc", Redoc::new("/api.json").axum_route())

@@ -26,6 +26,13 @@ pub struct Note {
     pub content: String
 }
 
+#[derive(Debug, Deserialize, Insertable, AsChangeset, JsonSchema)]
+#[diesel(table_name = notes)]
+pub struct CreateUpdateNote {
+    pub notebook_id: i32,
+    pub content: String
+}
+
 #[derive(Debug, Serialize, JsonSchema)]
 pub struct NotebookWithNotes {
     #[serde(flatten)]

@@ -1,4 +1,3 @@
-use std::error::Error;
 use axum::{Extension, Json};
 use axum::extract::Path;
 use axum::http::StatusCode;
@@ -8,21 +7,11 @@ use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::{AsyncConnection, RunQueryDsl};
 use diesel_async::scoped_futures::ScopedFutureExt;
 
+use crate::rest::CoerceErrExt;
 use crate::model::*;
 use crate::repository::Pool;
 use crate::schema::{notebooks, notes};
 
-trait CoerceErrExt<T, U : Error> {
-    fn coerce_err(self) -> Result<T, Response>;
-}
-
-impl<T, U: Error> CoerceErrExt<T, U> for Result<T, U> {
-    fn coerce_err(self) -> Result<T, Response> {
-        self.map_err(|e|
-            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-        )
-    }
-}
 
 pub async fn create_notebook(Extension(pool): Extension<Pool>, Json(create_notebook): Json<CreateUpdateNotebook>) -> Result<Json<i32>, Response> {
     diesel::insert_into(notebooks::table)
