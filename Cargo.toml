@@ -2,8 +2,18 @@
 name = "rust-notes"
 version = "0.1.0"
 edition = "2021"
+default-run="rust-notes"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "rust-notes"
+path = "src/main.rs"
+
+
+[[bin]]
+name = "grpc-client-get-notebook"
+path = "src/grpc_client_get_notebook.rs"
+
 
 [dependencies]
 diesel = { version = "2.1.4", features = ["postgres"] }
@@ -17,3 +27,10 @@ aide = { version = "0.13.1", features = ["axum", "redoc"] }
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"]}
 tower-http = { version = "0.5.1", features = ["trace"] }
+tonic = "0.10"
+prost = "0.12"
+futures-util = "0.3.30"
+
+
+[build-dependencies]
+tonic-build = "0.10"
