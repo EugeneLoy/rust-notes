@@ -1,13 +1,7 @@
 use tonic::Request;
-use crate::config::Config;
-use crate::grpc::proto;
 
-mod grpc;
-mod repository;
-mod config;
-mod schema;
-mod model;
-
+use rust_notes::config::Config;
+use rust_notes::grpc::proto;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

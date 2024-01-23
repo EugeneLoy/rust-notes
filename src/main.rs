@@ -4,19 +4,11 @@ use tonic::transport::Server;
 use tower_http::trace::{self, TraceLayer};
 use tracing::Level;
 
-use crate::config::Config;
-use crate::grpc::notes_service::NotesService;
-use crate::grpc::proto::notes_service_server::NotesServiceServer;
-use crate::repository::build_pool;
-use crate::routes::build_router;
-
-mod schema;
-mod routes;
-mod rest;
-mod grpc;
-mod repository;
-mod model;
-mod config;
+use rust_notes::config::Config;
+use rust_notes::grpc::notes_service::NotesService;
+use rust_notes::grpc::proto::notes_service_server::NotesServiceServer;
+use rust_notes::repository::build_pool;
+use rust_notes::routes::build_router;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>>{

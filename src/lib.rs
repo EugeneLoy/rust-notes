@@ -1,3 +1,11 @@
+pub mod schema;
+pub mod routes;
+pub mod rest;
+pub mod grpc;
+pub mod repository;
+pub mod model;
+pub mod config;
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
