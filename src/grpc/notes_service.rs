@@ -37,12 +37,12 @@ impl notes_service_server::NotesService for NotesService {
             .map_err(|e| Status::unknown(e.to_string()))?;
 
         let notebook = Notebook {
-            id: notebook.id.into(),
-            name: notebook.name.into(),
+            id: notebook.id,
+            name: notebook.name,
             notes: notes.into_iter().map(|note| Note {
-                id: note.id.into(),
-                text: note.content.into(),
-                notebook_id: note.notebook_id.into()
+                id: note.id,
+                content: note.content,
+                notebook_id: note.notebook_id
             }).collect::<Vec<Note>>()
         };
 

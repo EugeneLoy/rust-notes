@@ -19,13 +19,13 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     // setup tonic server (handles grpc api)
     let notes_service = NotesService::new(pool.clone());
-    let notes_service_address = format!("[::1]:{}",config.grpc_port).parse()?;
+    let notes_service_address = format!("0.0.0.0:{}",config.grpc_port).parse()?;
     let notes_service_server = Server::builder()
         .add_service(NotesServiceServer::new(notes_service));
 
     // run grpc in separate task
     let notes_service_server_handle = tokio::spawn(async move {
-        println!("Running grpc api on: http://[::1]:{}", config.grpc_port);
+        println!("Running grpc api on: http://localhost:{}", config.grpc_port);
         notes_service_server.serve(notes_service_address).await
     });
 
