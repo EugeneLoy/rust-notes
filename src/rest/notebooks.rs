@@ -7,7 +7,7 @@ use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl, SelectableHelper};
 use diesel_async::{AsyncConnection, RunQueryDsl};
 use diesel_async::scoped_futures::ScopedFutureExt;
 
-use crate::rest::CoerceErrExt;
+use crate::rest::{CoerceErrExt, Id};
 use crate::model::*;
 use crate::repository::Pool;
 use crate::schema::{notebooks, notes};
@@ -22,7 +22,7 @@ pub async fn create_notebook(State(pool): State<Pool>, Json(create_notebook): Js
         .coerce_err()
 }
 
-pub async fn get_notebook(State(pool): State<Pool>, Path(id): Path<i32>) -> Result<Json<NotebookWithNotes>, Response> {
+pub async fn get_notebook(State(pool): State<Pool>, Path(Id { id }): Path<Id>) -> Result<Json<NotebookWithNotes>, Response> {
     let notebook: Notebook = notebooks::table
         .find(id)
         .get_result(&mut pool.get().await.coerce_err()?).await
@@ -38,7 +38,7 @@ pub async fn get_notebook(State(pool): State<Pool>, Path(id): Path<i32>) -> Resu
         .coerce_err()
 }
 
-pub async fn update_notebook(State(pool): State<Pool>, Path(id): Path<i32>, Json(update_notebook): Json<CreateUpdateNotebook>) -> Result<StatusCode, Response> {
+pub async fn update_notebook(State(pool): State<Pool>, Path(Id { id }): Path<Id>, Json(update_notebook): Json<CreateUpdateNotebook>) -> Result<StatusCode, Response> {
     diesel::update(notebooks::table.find(id))
         .set(&update_notebook)
         .execute(&mut pool.get().await.coerce_err()?).await
@@ -49,7 +49,7 @@ pub async fn update_notebook(State(pool): State<Pool>, Path(id): Path<i32>, Json
         .coerce_err()
 }
 
-pub async fn delete_notebook(State(pool): State<Pool>, Path(id): Path<i32>) -> Result<StatusCode, Response> {
+pub async fn delete_notebook(State(pool): State<Pool>, Path(Id { id }): Path<Id>) -> Result<StatusCode, Response> {
     (pool.get().await.coerce_err()?).transaction::<StatusCode, diesel::result::Error, _>(|connection| async move {
         diesel::delete(notes::table)
             .filter(notes::notebook_id.eq(id))

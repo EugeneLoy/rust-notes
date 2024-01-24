@@ -5,10 +5,10 @@ use aide::{
     },
     openapi::{Info, OpenApi},
 };
-use aide::redoc::Redoc;
 use axum::{Extension, Json, Router};
 use axum::http::StatusCode;
-use axum::response::IntoResponse;
+use axum::response::{Html, IntoResponse};
+use axum_swagger_ui::swagger_ui;
 
 use crate::repository::Pool;
 use crate::rest::{notebooks, notes};
@@ -34,7 +34,7 @@ pub fn build_router() -> Router<Pool> {
         .api_route("/api/notes/:id", delete(notes::delete_note))
         .fallback(fallback_handler)
         .route("/api.json", get(serve_open_api))
-        .route("/redoc", Redoc::new("/api.json").axum_route())
+        .route("/swagger", get(|| async { Html(swagger_ui("/api.json")) }))
         .finish_api(&mut open_api)
         .layer(Extension(open_api))
 }

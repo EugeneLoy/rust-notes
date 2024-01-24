@@ -6,7 +6,7 @@ use axum::response::Response;
 use diesel::{QueryDsl, SelectableHelper};
 use diesel_async::RunQueryDsl;
 
-use crate::rest::CoerceErrExt;
+use crate::rest::{CoerceErrExt, Id};
 use crate::model::*;
 use crate::repository::Pool;
 use crate::schema::notes;
@@ -21,7 +21,7 @@ pub async fn create_note(State(pool): State<Pool>, Json(create_note): Json<Creat
         .coerce_err()
 }
 
-pub async fn get_note(State(pool): State<Pool>, Path(id): Path<i32>) -> Result<Json<Note>, Response> {
+pub async fn get_note(State(pool): State<Pool>, Path(Id { id }): Path<Id>) -> Result<Json<Note>, Response> {
     notes::table
         .find(id)
         .get_result(&mut pool.get().await.coerce_err()?).await
@@ -32,7 +32,7 @@ pub async fn get_note(State(pool): State<Pool>, Path(id): Path<i32>) -> Result<J
         })
 }
 
-pub async fn update_note(State(pool): State<Pool>, Path(id): Path<i32>, Json(update_note): Json<CreateUpdateNote>) -> Result<StatusCode, Response> {
+pub async fn update_note(State(pool): State<Pool>, Path(Id { id }): Path<Id>, Json(update_note): Json<CreateUpdateNote>) -> Result<StatusCode, Response> {
     diesel::update(notes::table.find(id))
         .set(&update_note)
         .execute(&mut pool.get().await.coerce_err()?).await
@@ -43,7 +43,7 @@ pub async fn update_note(State(pool): State<Pool>, Path(id): Path<i32>, Json(upd
         .coerce_err()
 }
 
-pub async fn delete_note(State(pool): State<Pool>, Path(id): Path<i32>) -> Result<StatusCode, Response> {
+pub async fn delete_note(State(pool): State<Pool>, Path(Id { id }): Path<Id>) -> Result<StatusCode, Response> {
     diesel::delete(notes::table.find(id))
         .execute(&mut pool.get().await.coerce_err()?).await
         .map(|deleted| match deleted {

@@ -23,7 +23,8 @@ axum = "0.7.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.68"
 schemars = { version = "0.8.16", features = ["derive"] }
-aide = { version = "0.13.1", features = ["axum", "redoc"] }
+aide = { version = "0.13.1", features = ["axum"] }
+axum-swagger-ui = "0.3.0"
 tracing = "0.1.37"
 tracing-subscriber = { version = "0.3.16", features = ["env-filter"]}
 tower-http = { version = "0.5.1", features = ["trace"] }

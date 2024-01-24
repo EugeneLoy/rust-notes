@@ -45,6 +45,7 @@ async fn main() -> Result<(), Box<dyn Error>>{
 
     let listener = tokio::net::TcpListener::bind(&format!("0.0.0.0:{}", config.rest_port)).await?;
     println!("Running rest api on: http://localhost:{}", config.rest_port);
+    println!("See rest api documentation at: http://localhost:{}/swagger", config.rest_port);
     axum::serve(listener, app).await?;
 
 

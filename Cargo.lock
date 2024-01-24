@@ -33,6 +33,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e07663aa8c3a96657684edd2fbca7261f53a10c7d0376fb0298df1fdebf0c38"
 dependencies = [
  "axum 0.7.4",
+ "axum-extra",
  "bytes",
  "cfg-if",
  "derive_more",
@@ -192,6 +193,34 @@ dependencies = [
  "tower-service",
  "tracing",
 ]
+
+[[package]]
+name = "axum-extra"
+version = "0.9.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "895ff42f72016617773af68fb90da2a9677d89c62338ec09162d4909d86fdd8f"
+dependencies = [
+ "axum 0.7.4",
+ "axum-core 0.4.3",
+ "bytes",
+ "futures-util",
+ "http 1.0.0",
+ "http-body 1.0.0",
+ "http-body-util",
+ "mime",
+ "pin-project-lite",
+ "serde",
+ "serde_html_form",
+ "tower",
+ "tower-layer",
+ "tower-service",
+]
+
+[[package]]
+name = "axum-swagger-ui"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "605877320e5ef98ba6bf000eeae03065557b0631d645c08ad6e84340d388948f"
 
 [[package]]
 name = "backtrace"
@@ -1282,6 +1311,7 @@ version = "0.1.0"
 dependencies = [
  "aide",
  "axum 0.7.4",
+ "axum-swagger-ui",
  "diesel",
  "diesel-async",
  "futures-util",
@@ -1413,6 +1443,19 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "serde_html_form"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "224e6a14f315852940f3ec103125aa6482f0e224732ed91ed3330ed633077c34"
+dependencies = [
+ "form_urlencoded",
+ "indexmap 2.1.0",
+ "itoa",
+ "ryu",
+ "serde",
 ]
 
 [[package]]
